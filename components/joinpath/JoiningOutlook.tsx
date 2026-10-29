@@ -1,0 +1,12 @@
+'use client';
+import { useState, useEffect, useRef } from 'react';
+import { ArrowUpRight, ArrowRight, Check, Building2, GraduationCap, UserRound, ShieldCheck, ArrowUp, LayoutDashboard, Users, BookOpen, CalendarDays, ChartNoAxesCombined, LogOut, Search, Bell, Plus, Download, Clock, ChevronDown, X, LockKeyhole, Eye, CheckCircle2, Mail, SlidersHorizontal } from 'lucide-react';
+import { Badge, Stat } from './common';
+import { Role, formatDate, lessons } from '@/lib/joinpath/data';
+type Props = {
+    demo: boolean;
+    candidates: any[];
+};
+export default function JoiningOutlook({ demo, candidates }: Props) {
+    return (<section className="panel"><div className="flex items-center justify-between"><div><h2 className="text-lg">Joining outlook</h2><p className="text-[11px] muted mt-1">{demo ? 'Expected and confirmed joinings, month by month' : 'Joinings shared with your workspace'}</p></div><Badge>{demo ? 'Sample outlook' : 'Live records'}</Badge></div>{demo ? <><div className="flex gap-5 text-[10px] muted mt-6"><span>■ Expected</span><span className="text-[#a7994f]">■ Confirmed</span></div><div className="chartgrid h-44 flex gap-6 items-end mt-4 pl-3 border-b border-[#c5c8bc]">{[48, 83, 62, 94, 55, 38].map((n, i) => <div key={i} className="flex-1 h-full flex items-end justify-center gap-1 relative"><div className="w-5 bg-[#e9d887] border border-[#857b4f]" style={{ height: n + '%' }}/><div className="w-5 bg-[#252623]" style={{ height: n * .7 + '%' }}/><span className="absolute -bottom-6 text-[10px] muted">{['Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr'][i]}</span></div>)}</div><div className="flex justify-between text-[10px] muted mt-10 pt-4 border-t border-[#deded7]"><span>Good beginnings take a little planning.</span><span>Nov 2026 – Apr 2027</span></div></> : <div className="min-h-56 flex flex-col justify-center">{candidates.filter((p: any) => p.joiningDate).length ? candidates.filter((p: any) => p.joiningDate).slice(0, 5).map((p: any) => <div key={p.id} className="py-4 border-b border-[#deded7] flex justify-between text-xs"><span>{p.name}</span><b>{formatDate(p.joiningDate)}</b></div>) : <div className="text-center"><CalendarDays className="mx-auto mb-4 text-[#8d987f]" size={30}/><h3>No joining dates yet</h3><p className="text-xs muted mt-2">Dates appear when a student shares joining information<br />and their company adds a joining date.</p></div>}</div>}</section>);
+}

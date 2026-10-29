@@ -1,0 +1,5 @@
+import { sqliteTable, text } from 'drizzle-orm/sqlite-core';
+export const accounts = sqliteTable('accounts', {
+    id: text('id').primaryKey(), email: text('email').notNull(), name: text('name').notNull(), role: text('role').notNull(), organization: text('organization').notNull(), createdAt: text('created_at').notNull(), lastLogin: text('last_login').notNull(), employerId: text('employer_id'), collegeId: text('college_id'), consent: text('consent').notNull().default('{}'), completed: text('completed').notNull().default('[]'), lastActivity: text('last_activity'), joiningStatus: text('joining_status').notNull().default('No offer yet'), joiningDate: text('joining_date'), dateReason: text('date_reason'), jobRole: text('job_role').notNull().default('Software Engineer'), history: text('history').notNull().default('[]')
+});
+export const consentEvents = sqliteTable('consent_events', { id: text('id').primaryKey(), userId: text('user_id').notNull(), choices: text('choices').notNull(), createdAt: text('created_at').notNull(), version: text('version').notNull() });

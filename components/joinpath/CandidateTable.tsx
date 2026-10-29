@@ -1,0 +1,18 @@
+'use client';
+import { useState, useEffect, useRef } from 'react';
+import { ArrowUpRight, ArrowRight, Check, Building2, GraduationCap, UserRound, ShieldCheck, ArrowUp, LayoutDashboard, Users, BookOpen, CalendarDays, ChartNoAxesCombined, LogOut, Search, Bell, Plus, Download, Clock, ChevronDown, X, LockKeyhole, Eye, CheckCircle2, Mail, SlidersHorizontal } from 'lucide-react';
+import { Badge, Stat } from './common';
+import { Role, formatDate, lessons } from '@/lib/joinpath/data';
+type Props = {
+    role: Role;
+    demo: boolean;
+    filtered: any[];
+    filter: string;
+    setFilter: (value: string) => void;
+    setModal: (value: any) => void;
+    query: string;
+    exportCSV: () => void;
+};
+export default function CandidateTable({ role, demo, filtered, filter, setFilter, setModal, query, exportCSV }: Props) {
+    return (<section className="border border-[#deded7] bg-white"><div className="flex justify-between items-center p-6 pb-2"><div><h2 className="text-xl">{role === 'college' ? 'Student joining tracker' : 'Your next great hires'}</h2><p className="text-[11px] muted mt-2">{demo ? 'Every offer has a person behind it.' : 'Only information students have chosen to share is shown.'}</p></div><button className="btn" onClick={exportCSV}><Download size={14}/>Export</button></div><div className="flex gap-6 px-6 border-b border-[#deded7] overflow-x-auto">{['All candidates', 'Confirmed', 'At risk', 'Deferred', 'Joined'].map(f => <button key={f} onClick={() => setFilter(f)} className={`text-[11px] py-4 whitespace-nowrap ${filter === f ? 'border-b-2 border-[#252623] font-semibold' : 'muted'}`}>{f}</button>)}</div><div className="overflow-x-auto"><table className="w-full whitespace-nowrap"><thead><tr>{['Candidate', 'Role / College', 'Joining date', 'Status', 'Learning progress', 'Latest signal', ''].map((x, i) => <th key={i}>{x}</th>)}</tr></thead><tbody>{filtered.map((p: any, i: number) => <tr key={p.id}><td><div className="flex items-center gap-3"><span className="rounded-full w-8 h-8 border border-[#a7b29e] bg-[#e6e9dc] flex items-center justify-center text-[10px]">{p.name.split(' ').slice(0, 2).map((s: string) => s[0]).join('')}</span><b>{p.name}</b></div></td><td>{p.jobRole || 'Not shared'}<div className="text-[10px] muted mt-1">{p.organization || 'Not shared'}</div></td><td>{p.joiningStatus === null ? 'Not shared' : formatDate(p.joiningDate)}</td><td><Badge>{p.joiningStatus || 'Private'}</Badge></td><td>{p.progress === null ? <span className="muted text-[11px]">Not shared</span> : <div className="flex items-center gap-3"><div className="w-16 h-1.5 bg-[#eee] overflow-hidden"><div className="h-full bg-[#a6c697]" style={{ width: p.progress + '%' }}/></div>{p.progress}%</div>}</td><td className="text-[11px] text-[#777d70]">{p.signal}</td><td><button aria-label={'View ' + p.name} onClick={() => setModal({ type: 'candidate', candidate: p })}><ArrowUpRight size={15}/></button></td></tr>)}</tbody></table>{!filtered.length && <div className="text-center p-14"><Users size={30} className="mx-auto text-[#8d987f] mb-4"/><h3>{query || filter !== 'All candidates' ? 'No matching candidates' : 'Your next great hires will appear here.'}</h3><p className="text-xs muted max-w-md mx-auto mt-3">{query ? 'Try another name or clear the filters.' : 'Students can select your workspace in Privacy & consent and choose which information to share. No student information is visible without their permission.'}</p></div>}</div><div className="text-[10px] muted px-6 py-4 border-t border-[#deded7]">{filtered.length} {demo ? 'sample' : 'shared'} records · Privacy choices apply to exports, too.</div></section>);
+}
