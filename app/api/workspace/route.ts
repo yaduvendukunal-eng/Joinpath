@@ -1,10 +1,11 @@
+import { apiFailure } from '../../../lib/joinpath/api-failure';
 import { getChatGPTUser } from '../../chatgpt-auth';
 import { getDb } from '../../../db';
 import { accounts, consentEvents } from '../../../db/schema';
 import { eq, or, desc } from 'drizzle-orm';
 export const dynamic = 'force-dynamic';
 const json = (data: unknown, status = 200) => Response.json(data, { status, headers: { 'Cache-Control': 'no-store' } });
-export async function GET() {
+async function handleGet() {
     const user = await getChatGPTUser();
     if (!user)
         return json({ error: 'Sign in required' }, 401);
@@ -19,10 +20,10 @@ export async function GET() {
     }
     const linked = await db.select().from(accounts).where(me.role === 'company' ? eq(accounts.employerId, me.id) : eq(accounts.collegeId, me.id));
     const candidates = linked.filter(x => x.role === 'student').flatMap(s => { const c = JSON.parse(s.consent)[me.role] || {}; if (!c.profile && !c.learning && !c.joining)
-        return []; const completed = JSON.parse(s.completed); return [{ id: s.id, name: c.profile ? s.name : 'Student · details private', email: c.profile ? s.email : null, organization: c.profile ? s.organization : null, jobRole: c.profile ? s.jobRole : null, progress: c.learning ? completed.length * 25 : null, lastActivity: c.learning ? s.lastActivity : null, joiningStatus: c.joining ? s.joiningStatus : null, joiningDate: c.joining ? s.joiningDate : null, dateReason: c.joining ? s.dateReason : null, canUpdateJoining: me.role === 'company' && !!c.joining, signal: c.learning && Date.now() - Date.parse(s.lastActivity || s.createdAt) > 21 * 86400000 ? 'No learning activity for 21+ days' : c.learning ? 'No inactivity flag' : 'Learning activity private' }]; });
+        return []; const completed = JSON.parse(s.completed); return [{ id: s.id, name: c.profile ? s.name : 'Student · details private', email: c.profile ? s.email : null, organization: c.profile ? s.organization : null, jobRole: c.profile ? s.jobRole : null, progress: c.learning ? completed.filter((id: string) => ['01', '02', '03', '04'].includes(id)).length * 25 : null, lastActivity: c.learning ? s.lastActivity : null, joiningStatus: c.joining ? s.joiningStatus : null, joiningDate: c.joining ? s.joiningDate : null, dateReason: c.joining ? s.dateReason : null, canUpdateJoining: me.role === 'company' && !!c.joining, signal: c.learning && Date.now() - Date.parse(s.lastActivity || s.createdAt) > 21 * 86400000 ? 'No learning activity for 21+ days' : c.learning ? 'No inactivity flag' : 'Learning activity private' }]; });
     return json({ me, directory, candidates, audit: [] });
 }
-export async function POST(req: Request) {
+async function handlePost(req: Request) {
     const user = await getChatGPTUser();
     if (!user)
         return json({ error: 'Sign in required' }, 401);
@@ -68,12 +69,12 @@ export async function POST(req: Request) {
         return json({ ok: true });
     }
     if (b.action === 'complete') {
-        if (me.role !== 'student' || !['01', '02', '03', '04'].includes(b.module))
+        if (me.role !== 'student' || !['01', '02', '03', '04', 'consent', 'joining'].includes(b.module))
             return json({ error: 'Not permitted' }, 403);
-        const done = JSON.parse(me.completed);
-        if (!done.includes(b.module))
-            done.push(b.module);
-        await db.update(accounts).set({ completed: JSON.stringify(done), lastActivity: now }).where(eq(accounts.id, me.id));
+        if (b.completed !== undefined && typeof b.completed !== 'boolean') return json({ error: 'Completion must be true or false' }, 400);
+        const current: string[] = JSON.parse(me.completed);
+        const done = b.completed === false ? current.filter(id => id !== b.module) : [...new Set([...current, b.module])];
+        await db.update(accounts).set({ completed: JSON.stringify(done), ...(['01', '02', '03', '04'].includes(b.module) ? { lastActivity: now } : {}) }).where(eq(accounts.id, me.id));
         return json({ ok: true });
     }
     if (b.action === 'confirm') {
@@ -95,3 +96,6 @@ export async function POST(req: Request) {
     }
     return json({ error: 'Unknown action' }, 400);
 }
+
+export async function GET() { try { return await handleGet(); } catch (error) { return apiFailure(error); } }
+export async function POST(request: Request) { try { return await handlePost(request); } catch (error) { return apiFailure(error); } }

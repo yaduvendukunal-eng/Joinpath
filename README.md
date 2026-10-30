@@ -1,132 +1,92 @@
 # Joinpath
 
-An offer-to-joining workspace for students, companies, and colleges. This source handoff uses **React 19, TypeScript, Tailwind CSS 4, Vinext, Cloudflare Workers, Drizzle ORM, and D1**.
+A campus offer-to-joining prototype shared by students, colleges and employers. This repository contains the **Supabase email/password edition**, including a **Judge Preview** for exploring all three dashboards without creating a Joinpath account.
 
-The screens were extracted into focused components from the deployed implementation. This is a source-code export; it does not change the hosted app.
+## Run the prototype
 
-## Start here
+Requirements: Node.js 22.13 or newer, pnpm 11.25, and internet access to install dependencies. Open a terminal in this folder (the one containing `package.json`).
 
-- `components/joinpath/JoinpathApp.tsx`: application state, navigation, and role-specific dashboard composition.
-- `components/joinpath/LoginScreen.tsx`: login, account registration, and sample-mode entry.
-- `components/joinpath/ConsentSettings.tsx`: recipient selection, granular sharing, withdrawal, and history.
-- `app/api/account/route.ts`: identity lookup and account registration.
-- `app/api/workspace/route.ts`: authorized reads and writes, consent enforcement, learning, joining updates.
-- `docs/ARCHITECTURE.md`: routes, data model, API contracts, and behavior.
+Run each command separately in Windows PowerShell:
 
-## Project structure
-
-```text
-app/
-  page.tsx                       Root redirect to login
-  layout.tsx                     Shared metadata and stylesheet
-  globals.css                    Tailwind and visual theme
-  chatgpt-auth.ts                 Server-only hosted identity helpers
-  login/page.tsx                 Login route
-  dashboard/[role]/page.tsx       Server-protected role route
-  api/account/route.ts           Account API
-  api/workspace/route.ts         Workspace API
-components/joinpath/
-  JoinpathApp.tsx                State and dashboard composition
-  LoginScreen.tsx                Login / registration
-  CandidateTable.tsx            Search/filter results and actions
-  ConsentSettings.tsx           Sharing choices and audit history
-  LearningPlan.tsx               Role learning modules
-  JoiningTimeline.tsx           Student joining history
-  JoiningOutlook.tsx             Company/college joining overview
-  common.tsx                    Brand, status badge, statistic card
-lib/joinpath/
-  api.ts                        Typed fetch wrapper entry point
-  data.ts                       Role constants, modules, sample records
-lib/                            Platform runtime support
-worker/index.ts                 Worker request entry point
-scripts/                        Framework and platform build helpers
-db/
-  schema.ts                     Accounts and consent audit schema
-  index.ts                      D1/Drizzle client
-drizzle/                        SQL migration and generation metadata
-tests/access.test.cjs           Authorization and consent tests
-docs/ARCHITECTURE.md            Implementation reference
-.openai/hosting.json            DB binding; no deployed project identity
-vite.config.ts                  React server, Worker, and Sites integration
-postcss.config.mjs              Tailwind compiler configuration
-package.json                   Development and verification commands
-pnpm-lock.yaml                 Dependency lockfile
-```
-
-## Local setup
-
-Requirements: Node.js **22.13+**, pnpm **11.25.0**, and package-registry access on the machine where dependencies are installed.
-
-```bash
+```powershell
+Copy-Item .env.example .env.local
 pnpm install --frozen-lockfile
 pnpm build
 ```
 
-The build generates the local Worker configuration. On a **fresh local database**, apply the included schema once:
+For a **fresh local database**, initialize the schema once:
 
-```bash
+```powershell
 node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_silky_madelyne_pryor.sql
 ```
 
-Then run:
+Start the app:
 
-```bash
+```powershell
 pnpm dev
 ```
 
-Open the localhost URL printed by the development server, normally `http://localhost:5173/login`.
+Open the localhost URL printed in the terminal (normally `http://localhost:5173/login`). On macOS/Linux, use `cp .env.example .env.local` instead of `Copy-Item`.
 
-Do not run the initial migration again against an already initialized database. Future schema changes should generate additional migrations with `pnpm db:generate`.
+Do not reapply the initial migration to an existing initialized database. For authentication setup and troubleshooting, see [Supabase setup](docs/SUPABASE-SETUP.md).
 
-### Login behavior
+## Judge walkthrough
 
-Production authentication is provided by **ChatGPT Sites**. Joinpath does not implement an email/password identity provider or store passwords.
+On the login page, choose **Student**, **College**, or **Company** under **Judge Preview**. Use **Explore as** to switch personas. You can also open `/prototype` directly.
 
-1. Choose a role on the login screen.
-2. Continue with ChatGPT.
-3. On first use, enter your profile and organization information.
-4. The server stores your role and redirects to `/dashboard/company`, `/dashboard/student`, or `/dashboard/college`.
-5. Returning users are routed using their saved role. Editing the URL does not change the account role.
+1. **College:** record a student's assessed skills, proficiency and dated evidence.
+2. **Company:** create a vacancy, inspect requirement coverage, shortlist a candidate and issue an offer.
+3. **Student:** respond to the offer, review sharing choices, follow the learning plan and submit an evidence link.
+4. **Company:** review the submission as Verified or Needs revision. Changing the joining date records a reason and requires a fresh student response.
+5. **College:** raise and follow an unresolved joining support case.
+6. **Company:** use the seeded past-date accepted offer to demonstrate evidence-backed actual joining. Future attendance cannot be verified.
+7. **Company/College:** inspect cohort flags with their reasons, including 21-day learning inactivity and two sufficiently aged unanswered confirmation requests.
 
-Portable localhost development includes a **development-only mock sign-in**. The built-in identity is `local_seedy` / `seedy@sites.test`. It is a single development account, not a multi-user authentication service. Use **Explore dashboard** to inspect all three sample roles without creating separate accounts. Mock sign-in is disabled in production builds.
+Demo data is **fictional and browser-local**. Role switching is a demonstration feature, not authentication. It does not grant access to real accounts. A task checkbox reports completion; employer evidence review is separate. Consent withdrawal is not a risk signal.
 
-### Student consent
+## Real accounts and storage
 
-A student selects a specific registered company and/or college and independently enables:
+Supabase Auth verifies identity and handles password/session flows. Configure email confirmation and redirect URLs using [the setup guide](docs/SUPABASE-SETUP.md). No Google Cloud account is required for email/password login.
 
-- Profile/contact details.
-- Learning progress and last activity.
-- Joining status and dates.
+Vinext server routes verify the user. Cloudflare D1 and Drizzle store account roles, consent and the existing authenticated workspace. A saved role routes the user to `/dashboard/student`, `/dashboard/college` or `/dashboard/company`. Role metadata from the client cannot change an existing role.
 
-All options start off. Choices and changes are persisted. Server-side projection removes fields without permission; withdrawal prevents subsequent reads through the app. Previously downloaded exports cannot be recalled.
+**Advanced skills, vacancy, multi-offer, evidence-review and cohort workflows remain in the separate browser-local prototype. They are not yet integrated with the authenticated database.** Company and college affiliation is self-reported, not institutionally verified. This edition does not move application data into Supabase Postgres.
 
-Real accounts start with empty records. Fictional candidate records appear only in sample mode. Sample changes remain in memory and do not change database records.
+The ChatGPT-hosted preview is a separate private deployment. A judge-preview link does not bypass its hosting access gate. This repository can run locally.
+
+## Code map
+
+| Folder | Responsibility |
+| --- | --- |
+| `app/` | Pages, auth callback/recovery and protected account/workspace APIs |
+| `components/joinpath/` | Login, judge entry, authenticated dashboards and consent controls |
+| `components/prototype/` | Interactive three-role demonstration and cohort UI |
+| `lib/supabase/` | Browser/server auth clients and configuration |
+| `lib/prototype/` | Skill matching, offer workflows and explainable cohort rules |
+| `lib/joinpath/` | Typed API client and safe response/error handling |
+| `db/`, `drizzle/` | D1/Drizzle schema and migration |
+| `tests/` | Access, consent, auth, response and prototype rule tests |
+| `scripts/`, `worker/` | Framework and Cloudflare runtime helpers |
+| `docs/` | Setup and implementation references |
+
+Some earlier architecture documents describe the original hosted edition. This README and `docs/SUPABASE-SETUP.md` describe the current authentication and storage boundaries.
 
 ## Verification
 
-```bash
-pnpm typecheck
+```powershell
 pnpm test
+pnpm typecheck
 pnpm build
 ```
 
-The handoff passes TypeScript checking, six server access/consent tests, and a production build. The tests exercise route handlers using a mocked database; they are not browser or deployed-D1 integration tests. Browser end-to-end verification was not available in the authoring environment.
+The suite contains 31 automated tests using mocked APIs and fictional domain data. These do not replace live multi-user, email delivery, recovery and deployed database tests.
 
-## Hosting and portability
+## Submission and limitations
 
-The runtime expects Cloudflare D1 and Sites-authenticated identity headers. The supplied manifest declares `DB` but intentionally omits the existing deployed Site ID. Register a new Site for a separate deployment; do not copy the original project's identity.
+Provide this repository or a downloaded source ZIP, plus a short backup demo recording. Test the exact source bundle on the intended device/network. A recording is not included here.
 
-Deploying this code on another provider requires replacing the hosted identity adapter and supplying a compatible database/runtime integration. Do not expose an endpoint on another host that blindly trusts client-supplied identity headers.
+Production work remains: integrate advanced records into the backend, verify institutions, add dependable notifications and validate real multi-user operation. No measured reduction in student non-joining is claimed.
 
-The existing hosted Site remains owner-private. Source export does not change its sharing settings or grant other users access.
+Stack: React, TypeScript, Tailwind CSS, Vinext, Supabase JS/SSR, Drizzle, Cloudflare Workers/D1. See `package.json` and `pnpm-lock.yaml` for complete dependency disclosure. Matching and flagging use deterministic rules, not a trained AI model. ChatGPT assisted code development, debugging and documentation. Demo records are fictional.
 
-## Scope and extension points
-
-- Organization registration is self-reported, not domain-verified membership.
-- Each authenticated identity has one saved role.
-- The learning plan is a curated four-module Software Engineer plan; role selection and generated curricula can be added in `lib/joinpath/data.ts`.
-- Companies can provide/revise a joining date only for linked students who authorize joining access.
-- Learning inactivity flags are derived from shared activity; automated reminders, mail delivery, two-confirmation tracking, and a real employer “mark joined” action are not implemented in the live workflow. Related sample data illustrates the intended experience.
-- No account deletion, identity-provider password recovery, team invitations, or organization verification workflow is included.
-
-No credentials, database contents, dependencies, or generated builds are included in this archive.
+Never commit `.env.local`, database contents, passwords, secret/service-role keys, generated builds or `node_modules`. `.env.example` contains only public client configuration.

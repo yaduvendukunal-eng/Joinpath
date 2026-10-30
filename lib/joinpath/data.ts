@@ -1,6 +1,6 @@
 import { Building2, GraduationCap, UserRound } from 'lucide-react';
 export type Role = 'company' | 'student' | 'college';
-export const roles: Role[] = ['company', 'student', 'college'];
+export const roles: Role[] = ['student', 'company', 'college'];
 export const roleIcons = { company: Building2, student: UserRound, college: GraduationCap };
 export const blankChoices = () => ({ company: { profile: false, learning: false, joining: false }, college: { profile: false, learning: false, joining: false } });
 export const lessons = [{ id: '01', name: 'Git & team workflows', time: '45 min', task: 'Create a branch, make a focused commit, and draft a pull request that explains the change.' }, { id: '02', name: 'JavaScript foundations', time: '60 min', task: 'Practice arrays, objects, and async functions. Write a function that fetches and filters a list of tasks.' }, { id: '03', name: 'Build your first REST API', time: '50 min', task: 'Create GET /tasks and POST /tasks endpoints. Validate incoming titles and add a README explaining how to run the project.' }, { id: '04', name: 'Testing & code review', time: '40 min', task: 'Write tests for a successful request, a missing title, and an unknown route. Leave one constructive code-review suggestion.' }];

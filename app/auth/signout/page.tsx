@@ -1,0 +1,2 @@
+export const dynamic='force-dynamic';
+export default function SignOut(){return <main className="min-h-screen flex items-center justify-center p-6"><section className="panel max-w-md"><h1 className="text-2xl">Sign out of Joinpath?</h1><p className="text-sm muted mt-4">Your saved account and role will be available the next time you sign in.</p><form method="post" action="/api/auth/signout"><button className="btn primary mt-6">Sign out</button></form><a href="/login" className="text-xs underline block mt-5">Back to account</a></section></main>;}

@@ -43,3 +43,8 @@ yarn-error.log*
 
 # OS metadata
 .DS_Store
+
+/node_modules
+
+# Safe public client configuration template
+!.env.example

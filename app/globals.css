@@ -1,2 +1,28 @@
 @import "tailwindcss";
 :root{--accent:#e9d887;--soft:#f7f2d9;color:#252623;background:#eeede7;font-family:Arial,Helvetica,sans-serif}*{box-sizing:border-box}body{margin:0}h1,h2,h3,.display{font-family:'Courier New',monospace;font-weight:700;letter-spacing:-.8px}button,a,input,select,textarea{outline-offset:4px}button,a{cursor:pointer}button:disabled{cursor:wait;opacity:.6}button{transition:background .15s}button:hover:not(:disabled){filter:brightness(.97)}input,select,textarea{border:1px solid #c9cbc1;background:white;padding:12px;width:100%;border-radius:0}input[type=checkbox]{width:18px;height:18px;accent-color:#354b35;cursor:pointer}label{font-size:12px}p{line-height:1.6}.btn{border:1px solid #252623;padding:11px 16px;background:white;font-size:12px;display:inline-flex;align-items:center;justify-content:center;gap:9px}.primary{background:var(--accent);box-shadow:3px 3px #252623;font-weight:600}.panel{border:1px solid #deded7;background:white;padding:24px}.muted{color:#777d70}.eyebrow{font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:#777d70}.badge{font-size:10px;padding:5px 8px;border:1px solid #c5d1bc;background:#edf4e7;display:inline-flex;align-items:center;gap:5px}.gridpaper{background-image:linear-gradient(#d8dacd66 1px,transparent 1px),linear-gradient(90deg,#d8dacd66 1px,transparent 1px);background-size:32px 32px}.shadowhard{box-shadow:5px 5px #252623}.thinshadow{box-shadow:3px 3px #252623}.chartgrid{background:repeating-linear-gradient(to top,transparent 0,transparent 39px,#ecece7 40px,#ecece7 41px)}th{font-size:10px;font-weight:500;color:#777d70;background:#fafaf6;text-align:left;padding:15px 18px}td{font-size:12px;padding:17px 18px;border-top:1px solid #e1e2da}dialog{max-width:540px;width:calc(100% - 32px);border:1px solid #252623;padding:28px;margin:auto;box-shadow:6px 6px #252623}dialog::backdrop{background:#25262366}a{text-decoration:none;color:inherit}.toggle{width:38px;height:22px;border:1px solid #53624b;border-radius:20px;background:#d8ddcf;position:relative;display:block}.toggle:after{content:'';width:14px;height:14px;border-radius:50%;position:absolute;top:3px;left:4px;background:white;border:1px solid #66705d}.toggle.on{background:#627a52}.toggle.on:after{left:18px}::selection{background:#e9d887}
+
+/* Student task motion: change 80ms, .55s, and 1.07 to tune the feel. */
+.task-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.tile{min-width:0}
+.tile.in{animation:tile-enter .55s cubic-bezier(.2,.75,.25,1) calc(var(--i) * 80ms) both}
+.task-card{height:100%;display:flex;flex-direction:column;border:1px solid #252623;background:#fffef8;padding:20px;transition:transform .18s ease,box-shadow .18s ease,background .18s ease}
+.task-card.done{background:#edf3e6}
+@media(hover:hover){.task-card:hover{transform:translateY(-5px) rotate(-1deg);box-shadow:4px 5px 0 #252623}}
+.task-card:focus-within{outline:2px solid #637d53;outline-offset:4px}
+.task-card.pop{animation:pop .34s ease-out}
+.task-check-label{position:relative;width:25px;height:25px;flex-shrink:0}
+.task-check-label input{position:absolute;inset:0;opacity:0;margin:0!important;width:25px!important;height:25px!important;z-index:1}
+.task-check{display:flex;align-items:center;justify-content:center;width:25px;height:25px;border:1.5px solid #000;color:white;background:white}
+.task-check-label input:checked+.task-check{background:#000;border-color:#000}
+.task-check-label input:focus-visible+.task-check{outline:3px solid #6c855d;outline-offset:4px}
+.task-check-label input:disabled{cursor:default}
+.task-check-label input:disabled:not(:checked)+.task-check{border-color:#a6aa9e;background:#f0f1ea}
+.task-state{font-size:10px;font-weight:600;white-space:nowrap}
+.task-open{display:inline-flex;gap:5px;align-items:center;font-size:10px;text-decoration:underline;text-underline-offset:3px;background:transparent;border:0;padding:5px 0}
+.task-open:disabled{cursor:default}
+.task-overall-track{height:6px;background:#e6e8df;overflow:hidden}
+.task-overall-track span{height:100%;display:block;background:#252623;transition:width .2s ease}
+@keyframes tile-enter{from{opacity:0;transform:translateY(24px) rotate(-3deg)}to{opacity:1;transform:translateY(0) rotate(0)}}
+@keyframes pop{0%,100%{transform:scale(1)}45%{transform:scale(1.07) rotate(1deg)}70%{transform:scale(.98)}}
+@media(max-width:560px){.task-grid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.student-tasks *,.student-tasks *::before,.student-tasks *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.student-tasks .task-card:hover{transform:none!important}}
